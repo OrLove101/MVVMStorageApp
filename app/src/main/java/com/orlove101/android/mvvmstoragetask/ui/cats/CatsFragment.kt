@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.orlove101.android.mvvmstoragetask.data.models.Cat
 import com.orlove101.android.mvvmstoragetask.databinding.FragmentCatsBinding
+import com.orlove101.android.mvvmstoragetask.util.exhaustive
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
@@ -34,6 +38,25 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerViewSetUp()
+
+        viewModel.cats.observe(viewLifecycleOwner) {
+            catsAdapter?.submitList(it)
+        }
+
+        catsEventHandler()
+    }
+
+    private fun catsEventHandler() {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.catsEvent.collect { event ->
+                when (event) {
+                    CatsViewModel.CatsEvent.NavigateToAddCatScreen -> TODO()
+                    is CatsViewModel.CatsEvent.NavigateToEditCatScreen -> TODO()
+                    is CatsViewModel.CatsEvent.ShowCatSavedConfirmationMessage -> TODO()
+                    is CatsViewModel.CatsEvent.ShowUndoDeleteCatMessage -> TODO()
+                }
+            }.exhaustive
+        }
     }
 
     private fun recyclerViewSetUp() {
@@ -60,14 +83,22 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
                 }
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    
+                    val cat = catsAdapter?.currentList?.get(viewHolder.adapterPosition)
+
+                    viewModel.onCatSwiped(requireNotNull(cat))
                 }
-            })
+            }).attachToRecyclerView(recyclerView)
+
+            setFragmentResultListener("add_edit_request") { _, bundle ->
+                val result = bundle.getInt("add_edit_result")
+
+                viewModel.onAddEditResult(result)
+            }
         }
     }
 
     override fun onItemClick(cat: Cat) {
-        TODO("Not yet implemented")
+        viewModel.onCatSelected(cat)
     }
 
     override fun onDestroyView() {
