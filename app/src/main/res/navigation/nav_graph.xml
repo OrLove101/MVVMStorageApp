@@ -8,5 +8,24 @@
     <fragment
         android:id="@+id/catsFragment"
         android:name="com.orlove101.android.mvvmstoragetask.ui.cats.CatsFragment"
-        tools:layout="@layout/fragment_cats" />
+        android:label="Cats"
+        tools:layout="@layout/fragment_cats">
+        <action
+            android:id="@+id/action_catsFragment_to_addEditCatFragment"
+            app:destination="@id/addEditCatFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addEditCatFragment"
+        android:name="com.orlove101.android.mvvmstoragetask.ui.addeditcat.AddEditCatFragment"
+        android:label="{title}"
+        tools:layout="@layout/fragment_add_edit_cat">
+        <argument
+            android:name="cat"
+            android:defaultValue="@null"
+            app:argType="com.orlove101.android.mvvmstoragetask.data.models.Cat"
+            app:nullable="true" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+    </fragment>
 </navigation>
