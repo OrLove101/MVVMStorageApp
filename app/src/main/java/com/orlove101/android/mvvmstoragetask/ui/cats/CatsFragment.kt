@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -55,8 +56,18 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.catsEvent.collect { event ->
                 when (event) {
-                    CatsViewModel.CatsEvent.NavigateToAddCatScreen -> TODO()
-                    is CatsViewModel.CatsEvent.NavigateToEditCatScreen -> TODO()
+                    CatsViewModel.CatsEvent.NavigateToAddCatScreen -> {
+                        val action = CatsFragmentDirections
+                            .actionCatsFragmentToAddEditCatFragment(title = "New Cat")
+
+                        findNavController().navigate(action)
+                    }
+                    is CatsViewModel.CatsEvent.NavigateToEditCatScreen -> {
+                        val action = CatsFragmentDirections
+                            .actionCatsFragmentToAddEditCatFragment(event.cat, "Edit Cat")
+
+                        findNavController().navigate(action)
+                    }
                     is CatsViewModel.CatsEvent.ShowCatSavedConfirmationMessage -> {
                         Snackbar.make(requireView(), event.msg, Snackbar.LENGTH_LONG).show()
                     }
