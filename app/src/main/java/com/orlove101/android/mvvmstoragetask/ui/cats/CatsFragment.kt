@@ -2,7 +2,8 @@ package com.orlove101.android.mvvmstoragetask.ui.cats
 
 import android.os.Bundle
 import android.view.*
-import android.widget.SearchView
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -16,12 +17,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.orlove101.android.mvvmstoragetask.R
 import com.orlove101.android.mvvmstoragetask.data.models.Cat
 import com.orlove101.android.mvvmstoragetask.databinding.FragmentCatsBinding
-import com.orlove101.android.mvvmstoragetask.persistence.SortOrder
+import com.orlove101.android.mvvmstoragetask.persistence.Room.SortOrder
+import com.orlove101.android.mvvmstoragetask.persistence.SQLite.CatsDatabaseHelper
 import com.orlove101.android.mvvmstoragetask.util.exhaustive
 import com.orlove101.android.mvvmstoragetask.util.onQueryTextChanged
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
@@ -50,6 +51,13 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
         }
 
         catsEventHandler()
+
+        binding.actionButton.setOnClickListener {
+            viewModel.onAddNewCatClick()
+            //viewModel.catsDbHelper.addCat(Cat(name = "Cat", age = 2, breed = "HOHO"))
+        }
+
+        setHasOptionsMenu(true)
     }
 
     private fun catsEventHandler() {
@@ -76,6 +84,12 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
                             .setAction("Undo") {
                                 viewModel.onUndoDeleteClick(event.cat)
                             }.show()
+                    }
+                    is CatsViewModel.CatsEvent.NavigateToSettingsScreen -> {
+                        val action = CatsFragmentDirections
+                            .actionGlobalSettingsFragment()
+
+                        findNavController().navigate(action)
                     }
                 }
             }.exhaustive
@@ -146,19 +160,20 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // on click redirect to settings screen
         return when(item.itemId) {
-            R.id.action_sort_by_name -> {
-                viewModel.onSortOrderSelected(SortOrder.BY_NAME)
-                true
-            }
-            R.id.action_sort_by_age -> {
-                viewModel.onSortOrderSelected(SortOrder.BY_AGE)
-                true
-            }
-            R.id.action_sort_by_breed -> {
-                viewModel.onSortOrderSelected(SortOrder.BY_BREED)
-                true
-            }
+//            R.id.action_sort_by_name -> {
+//                viewModel.onSortOrderSelected(SortOrder.BY_NAME)
+//                true
+//            }
+//            R.id.action_sort_by_breed -> {
+//                viewModel.onSortOrderSelected(SortOrder.BY_BREED)
+//                true
+//            }
+              R.id.action_global_settingsFragment -> {
+                  viewModel.onSettingsClick()
+                  true
+              }
             else -> super.onOptionsItemSelected(item)
         }
     }

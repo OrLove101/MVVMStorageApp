@@ -1,14 +1,20 @@
 package com.orlove101.android.mvvmstoragetask.ui.cats
 
+import android.content.Context
 import androidx.lifecycle.*
 import com.orlove101.android.mvvmstoragetask.data.models.Cat
-import com.orlove101.android.mvvmstoragetask.persistence.CatsDao
-import com.orlove101.android.mvvmstoragetask.persistence.PreferencesManager
-import com.orlove101.android.mvvmstoragetask.persistence.SortOrder
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CatsDao
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CurrentDatabase
+import com.orlove101.android.mvvmstoragetask.persistence.Room.PreferencesManager
+import com.orlove101.android.mvvmstoragetask.persistence.Room.SortOrder
+import com.orlove101.android.mvvmstoragetask.persistence.SQLite.CatsDatabaseHelper
 import com.orlove101.android.mvvmstoragetask.ui.ADD_TASK_RESULT_OK
 import com.orlove101.android.mvvmstoragetask.ui.EDIT_TASK_RESULT_OK
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -19,10 +25,10 @@ import javax.inject.Inject
 class CatsViewModel @Inject constructor(
     private val catsDao: CatsDao,
     private val preferencesManager: PreferencesManager,
-    private val state: SavedStateHandle
+    private val state: SavedStateHandle,
+    private val catsDbHelper: CatsDatabaseHelper
 ): ViewModel() {
     val searchQuery = state.getLiveData("searchQuery", "")
-
     val preferencesFlow = preferencesManager.preferencesFlow
 
     private val catsEventChannel = Channel<CatsEvent>()
@@ -34,7 +40,12 @@ class CatsViewModel @Inject constructor(
     ) { query, filterPreferences ->
         Pair(query, filterPreferences)
     }.flatMapLatest { (query, filterPreferences) ->
-        catsDao.getCats(query, filterPreferences)
+        currentDatabase = filterPreferences.currentDatabase
+        if (filterPreferences.currentDatabase == CurrentDatabase.ROOM) {
+            catsDao.getCats(query, filterPreferences.sortOrder)
+        } else {
+            catsDbHelper.getCats(query, filterPreferences.sortOrder)
+        }
     }
 
     val cats = catsFlow.asLiveData()
@@ -51,14 +62,23 @@ class CatsViewModel @Inject constructor(
 
     fun onCatSwiped(cat: Cat) {
         viewModelScope.launch {
-            catsDao.delete(cat)
+            if (currentDatabase == CurrentDatabase.ROOM) {
+                catsDao.delete(cat)
+            } else {
+                catsDbHelper.delete(cat)
+                // TODO fix behaviour: after deleting remains empty row in recycler view but after app reload all correctly
+            }
             catsEventChannel.send(CatsEvent.ShowUndoDeleteCatMessage(cat))
         }
     }
 
     fun onUndoDeleteClick(cat: Cat) {
         viewModelScope.launch {
-            catsDao.insert(cat)
+            if (currentDatabase == CurrentDatabase.ROOM) {
+                catsDao.insert(cat)
+            } else {
+                catsDbHelper.insert(cat)
+            }
         }
     }
 
@@ -79,10 +99,21 @@ class CatsViewModel @Inject constructor(
         catsEventChannel.send(CatsEvent.ShowCatSavedConfirmationMessage(text))
     }
 
+    fun onSettingsClick(): Job {
+        return viewModelScope.launch {
+            catsEventChannel.send(CatsEvent.NavigateToSettingsScreen)
+        }
+    }
+
     sealed class CatsEvent {
         object NavigateToAddCatScreen: CatsEvent()
         data class NavigateToEditCatScreen(val cat: Cat): CatsEvent()
         data class ShowUndoDeleteCatMessage(val cat: Cat): CatsEvent()
         data class ShowCatSavedConfirmationMessage(val msg: String): CatsEvent()
+        object NavigateToSettingsScreen: CatsEvent()
+    }
+
+    companion object {
+        var currentDatabase: CurrentDatabase = CurrentDatabase.ROOM
     }
 }

@@ -1,9 +1,11 @@
 package com.orlove101.android.mvvmstoragetask.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
-import com.orlove101.android.mvvmstoragetask.persistence.CatsDao
-import com.orlove101.android.mvvmstoragetask.persistence.CatsDatabase
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CatsDao
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CatsDatabase
+import com.orlove101.android.mvvmstoragetask.ui.MainActivity
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

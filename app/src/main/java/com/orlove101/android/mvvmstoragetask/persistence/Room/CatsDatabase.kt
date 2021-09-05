@@ -1,4 +1,4 @@
-package com.orlove101.android.mvvmstoragetask.persistence
+package com.orlove101.android.mvvmstoragetask.persistence.Room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

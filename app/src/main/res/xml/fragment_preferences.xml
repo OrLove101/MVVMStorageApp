@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="Sorting">
+
+        <Preference
+            app:key="name"
+            app:title="By Name"
+            />
+
+        <Preference
+            app:key="breed"
+            app:title="By Breed"
+            />
+
+        <Preference
+            app:key="age"
+            app:title="By Age"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Database">
+
+        <Preference
+                app:key="room"
+                app:title="Go to Room database"
+                />
+
+        <Preference
+            app:key="sql"
+            app:title="Go to SQL database"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>

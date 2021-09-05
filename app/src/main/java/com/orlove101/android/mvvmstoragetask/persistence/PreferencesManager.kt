@@ -1,4 +1,4 @@
-package com.orlove101.android.mvvmstoragetask.persistence
+package com.orlove101.android.mvvmstoragetask.persistence.Room
 
 import android.content.Context
 import android.util.Log
@@ -15,6 +15,9 @@ import javax.inject.Singleton
 private const val TAG = "PreferencesManager"
 
 enum class SortOrder { BY_NAME, BY_AGE, BY_BREED }
+enum class CurrentDatabase { ROOM, SQLITE }
+
+data class SettingsPreferences(val sortOrder: SortOrder, val currentDatabase: CurrentDatabase)
 
 @Singleton
 class PreferencesManager @Inject constructor(@ApplicationContext val context: Context) {
@@ -30,9 +33,13 @@ class PreferencesManager @Inject constructor(@ApplicationContext val context: Co
             }
         }
         .map { preferences ->
-            SortOrder.valueOf(
+            val sortOrder = SortOrder.valueOf(
                 preferences[PreferencesKeys.SORT_ORDER] ?: SortOrder.BY_NAME.name
             )
+            val currentDatabase = CurrentDatabase.valueOf(
+                preferences[PreferencesKeys.CURRENT_DATABASE] ?: CurrentDatabase.ROOM.name
+            )
+            SettingsPreferences(sortOrder, currentDatabase)
         }
 
     suspend fun updateSortOrder(sortOrder: SortOrder) {
@@ -41,7 +48,14 @@ class PreferencesManager @Inject constructor(@ApplicationContext val context: Co
         }
     }
 
+    suspend fun updateCurrentDatabase(currentDatabase: CurrentDatabase) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CURRENT_DATABASE] = currentDatabase.name
+        }
+    }
+
     private object PreferencesKeys {
         val SORT_ORDER = stringPreferencesKey("sort_order")
+        val CURRENT_DATABASE = stringPreferencesKey("current_database")
     }
 }

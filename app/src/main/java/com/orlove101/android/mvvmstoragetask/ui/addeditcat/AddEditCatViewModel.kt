@@ -4,9 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orlove101.android.mvvmstoragetask.data.models.Cat
-import com.orlove101.android.mvvmstoragetask.persistence.CatsDao
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CatsDao
+import com.orlove101.android.mvvmstoragetask.persistence.Room.CurrentDatabase
+import com.orlove101.android.mvvmstoragetask.persistence.SQLite.CatsDatabaseHelper
 import com.orlove101.android.mvvmstoragetask.ui.ADD_TASK_RESULT_OK
 import com.orlove101.android.mvvmstoragetask.ui.EDIT_TASK_RESULT_OK
+import com.orlove101.android.mvvmstoragetask.ui.cats.CatsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -16,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddEditCatViewModel @Inject constructor(
     private val catsDao: CatsDao,
-    private val state: SavedStateHandle
+    private val state: SavedStateHandle,
+    private val catsDbHelper: CatsDatabaseHelper
 ) : ViewModel() {
     val cat = state.get<Cat>("cat")
     var catName = state.get<String>("catName") ?: cat?.name ?: ""
@@ -24,7 +28,7 @@ class AddEditCatViewModel @Inject constructor(
             field = value
             state.set("taskName", value)
         }
-    var catAge = state.get<String>("catAge") ?: cat?.age.toString() ?: ""
+    var catAge = state.get<String>("catAge") ?: cat?.age?.toString() ?: ""
         set(value) {
             field = value
             state.set("catAge", value)
@@ -59,14 +63,22 @@ class AddEditCatViewModel @Inject constructor(
 
     private fun createCat(cat: Cat) {
         viewModelScope.launch {
-            catsDao.insert(cat)
+            if (CatsViewModel.currentDatabase == CurrentDatabase.ROOM) {
+                catsDao.insert(cat)
+            } else {
+                catsDbHelper.insert(cat)
+            }
             addEditCatEventChannel.send(AddEditCatEvent.NavigateBackWithResult(ADD_TASK_RESULT_OK))
         }
     }
 
     private fun updateCat(cat: Cat) {
         viewModelScope.launch {
-            catsDao.update(cat)
+            if (CatsViewModel.currentDatabase == CurrentDatabase.ROOM) {
+                catsDao.update(cat)
+            } else {
+                catsDbHelper.update(cat)
+            }
             addEditCatEventChannel.send(AddEditCatEvent.NavigateBackWithResult(EDIT_TASK_RESULT_OK))
         }
     }

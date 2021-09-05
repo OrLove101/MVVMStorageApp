@@ -1,4 +1,4 @@
-package com.orlove101.android.mvvmstoragetask.persistence
+package com.orlove101.android.mvvmstoragetask.persistence.Room
 
 import androidx.room.*
 import com.orlove101.android.mvvmstoragetask.data.models.Cat
@@ -17,10 +17,10 @@ interface CatsDao {
     @Query("SELECT * FROM cats_table WHERE name LIKE '%' || :searchQuery || '%' ORDER BY name")
     fun getCatsSortedByName(searchQuery: String): Flow<List<Cat>>
 
-    @Query("SELECT * FROM cats_table WHERE name LIKE '%' || :searchQuery || '%' ORDER BY age")
+    @Query("SELECT * FROM cats_table WHERE age LIKE '%' || :searchQuery || '%' ORDER BY age")
     fun getCatsSortedByAge(searchQuery: String): Flow<List<Cat>>
 
-    @Query("SELECT * FROM cats_table WHERE name LIKE '%' || :searchQuery|| '%' ORDER BY breed")
+    @Query("SELECT * FROM cats_table WHERE breed LIKE '%' || :searchQuery || '%' ORDER BY breed")
     fun getCatsSortedByBreed(searchQuery: String): Flow<List<Cat>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

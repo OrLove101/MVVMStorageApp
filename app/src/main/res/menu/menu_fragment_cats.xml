@@ -9,22 +9,19 @@
         app:showAsAction="always|collapseActionView"/>
 
     <item
+        android:id="@+id/action_global_settingsFragment"
         android:icon="@drawable/ic_baseline_sort_24"
         android:title="Sort"
         app:showAsAction="always">
 
-        <menu>
-            <item
-                android:id="@+id/action_sort_by_name"
-                android:title="Sort by name"/>
+<!--        <menu>-->
+<!--            <item-->
+<!--                android:id="@+id/action_sort_by_name"-->
+<!--                android:title="Sort by name"/>-->
 
-            <item
-                android:id="@+id/action_sort_by_age"
-                android:title="Sort by age"/>
-
-            <item
-                android:id="@+id/action_sort_by_breed"
-                android:title="Sort by breed"/>
-        </menu>
+<!--            <item-->
+<!--                android:id="@+id/action_sort_by_breed"-->
+<!--                android:title="Sort by breed"/>-->
+<!--        </menu>-->
     </item>
 </menu>
