@@ -18,3 +18,7 @@
 
 ## Extra feature 
 - Room and SQLite databases change on click.
+
+## Dir Structure
+
+[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=10lg7sZjCboJ2Kyr5XMDT4ithmmad9B4C)](https://drive.google.com/file/d/10lg7sZjCboJ2Kyr5XMDT4ithmmad9B4C/view?usp=sharing "")
