@@ -187,4 +187,6 @@ class CatsFragment: Fragment(), CatsAdapter.OnItemClickListener {
         searchView?.setOnQueryTextListener(null)
         _binding = null
     }
+
+    // changes to PR
 }
